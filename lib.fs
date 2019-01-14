@@ -60,3 +60,8 @@ let largestPalindromeProduct =
     >> Seq.filter isPalindrome
     >> Seq.max
 
+let charsToString (xs:char seq) =
+    xs
+    |> Seq.map string
+    |> Seq.reduce (+)
+
