@@ -39,10 +39,10 @@ let primeFactors =
 
 let largestPrimeFactor = primeFactors >> Seq.max
 
-let isPrime =
-    intPrimeFactors
-    >> Seq.length
-    >> (=) 1
+let inline isOneItem xs = Seq.length xs |> (=) 1
+
+let isPrime = primeFactors >> isOneItem
+let isIntPrime = intPrimeFactors >> isOneItem
 
 let isPalindrome number =
     let asString = string number
