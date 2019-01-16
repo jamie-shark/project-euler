@@ -12,6 +12,15 @@ let allNumbers =
         }
     next 0
 
+let allUInts =
+    let rec next x =
+        seq {
+            let value = x + 1UL
+            yield value
+            yield! next value
+        }
+    next 0UL
+
 let isDivisibleBy divisor number = (number % divisor) = 0
 
 let intPrimeFactors =
