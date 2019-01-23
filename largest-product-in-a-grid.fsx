@@ -13,7 +13,7 @@ let getCoordinates width height =
     }
 
 let getCoordinateOfDirection coord direction =
-    match coord direction with
+    match coord, direction with
     | (x, y), UL -> (x-1, y-1)
     | (x, y), U  -> (x  , y-1)
     | (x, y), UR -> (x-1, y+1)
@@ -53,25 +53,51 @@ let getValueAtCoordinate grid coord =
     |> Seq.skip y |> Seq.head
     |> Seq.skip x |> Seq.head
 
+let getValuesFromGrid grid =
+    Seq.map (getValueAtCoordinate grid)
+
 let largestProductInGrid grid size =
     let width = grid |> Seq.head |> Seq.length
     let height = grid |> Seq.length
 
     getCoordinates width height
     |> getValidLines width height size
-    |> Seq.map (Seq.map ((getValueAtCoordinate grid) >> Seq.reduce (*)))
+    |> Seq.map (getValuesFromGrid grid  >> Seq.reduce ( *))
     |> Seq.max
 
 getCoordinates 2 2 |> Seq.toList |> Is [(0, 0);(0, 1);(1, 0);(1, 1)]
-getCoordinates 2 2 |> getLines 2 |> Seq.toList |> Is [(0, 0);(0, 1);
-                                                   (0, 0);(1, 0);
-                                                   (0, 0);(1, 1);
-                                                   (1, 0);(0, 1)]
+
+getCoordinates 2 2 |> getLinesInAllDirectionsOfSize 2
+|> Seq.map Seq.toList |> Seq.toList
+|> Is [ [(0, 0);(0, 1)] ;
+        [(0, 0);(1, 0)] ;
+        [(0, 0);(1, 1)] ;
+        [(1, 0);(0, 1)] ]
+
+getCoordinateOfDirection (0, 0) UL |> Is (-1 , 1 )
+getCoordinateOfDirection (0, 0) U  |> Is ( 0 , 1 )
+getCoordinateOfDirection (0, 0) UR |> Is ( 1 , 1 )
+getCoordinateOfDirection (0, 0) L  |> Is (-1 , 0 )
+getCoordinateOfDirection (0, 0) R  |> Is ( 1 , 0 )
+getCoordinateOfDirection (0, 0) DL |> Is (-1 ,-1 )
+getCoordinateOfDirection (0, 0) D  |> Is ( 0 ,-1 )
+getCoordinateOfDirection (0, 0) DR |> Is ( 1 ,-1 )
+
+isInBounds 1 1 (0, 0) |> Is true
+isInBounds 2 2 (1, 1) |> Is true
+isInBounds 2 2 (-1, 1) |> Is false
+isInBounds 2 2 (1, 2) |> Is false
+
+getLine (0, 0) 1 R |> Is [(0,0)]
+getLine (0, 0) 2 R |> Is [(0,0);(1,0)]
+getLine (1, 1) 3 DR |> Is [(1,1);(2,0);(3,-1)]
+getLine (4, 0) 4 U |> Is [(4,0);(4,1);(4,2);(4,3)]
 
 largestProductInGrid [[1]] 1 |> Is 1
 //largestProductInGrid [[1;2];[3;4]] 1 |> Is 4
 //largestProductInGrid [[1;2];[3;4]] 2 |> Is 12
 //largestProductInGrid [[1;2;3];[1;2;3];[1;2;3]] 2 |> Is 9
+//largestProductInGrid [[3;2;1];[1;3;2];[1;2;3]] 3 |> Is 27
 
 let testGrid =
     [ "08 02 22 97 38 15 00 40 00 75 04 05 07 78 52 12 50 77 91 08"

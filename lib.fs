@@ -65,7 +65,7 @@ let combinations =
 
 let largestPalindromeProduct =
     combinations 2
-    >> Seq.map (Seq.reduce (*))
+    >> Seq.map (Seq.reduce ( *))
     >> Seq.filter isPalindrome
     >> Seq.max
 
