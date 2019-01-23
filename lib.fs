@@ -1,5 +1,7 @@
 module Lib
 
+open Microsoft.FSharp.Reflection
+
 let flip f a b = f b a
 let (><) = flip
 
@@ -74,3 +76,6 @@ let charsToString (xs:char seq) =
     |> Seq.map string
     |> Seq.reduce (+)
 
+let allUnionCases<'T>() =
+    FSharpType.GetUnionCases(typeof<'T>)
+    |> Array.map (fun case -> FSharpValue.MakeUnion(case, [||]) :?> 'T)

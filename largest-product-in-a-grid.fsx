@@ -2,7 +2,6 @@
 #load "lib.fs"
 open Assertions
 open Lib
-//open Microsoft.FSharp.Reflection
 
 type Direction = UL | U | UR | L | R | DL | D | DR
 
@@ -43,8 +42,7 @@ let getLine coord length direction =
     getLine' [] coord length
 
 let getLinesInAllDirectionsOfSize length coord =
-    //let directions = FSharpType.GetUnionCases typeof<Direction>
-    [UL;U;UR;L;R;DL;D;DR]
+    allUnionCases<Direction> ()
     |> Seq.map (getLine coord length)
 
 let isPointInBounds width height = function
