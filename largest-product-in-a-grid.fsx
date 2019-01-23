@@ -14,38 +14,38 @@ let getCoordinates width height =
 
 let getCoordinateOfDirection coord direction =
     match coord, direction with
-    | (x, y), UL -> (x-1, y-1)
-    | (x, y), U  -> (x  , y-1)
-    | (x, y), UR -> (x-1, y+1)
+    | (x, y), UL -> (x-1, y+1)
+    | (x, y), U  -> (x  , y+1)
+    | (x, y), UR -> (x+1, y+1)
     | (x, y), L  -> (x-1, y  )
     | (x, y), R  -> (x+1, y  )
-    | (x, y), DL -> (x-1, y+1)
-    | (x, y), D  -> (x  , y+1)
-    | (x, y), DR -> (x+1, y+1)
+    | (x, y), DL -> (x-1, y-1)
+    | (x, y), D  -> (x  , y-1)
+    | (x, y), DR -> (x+1, y-1)
 
-let isInBounds width height = function
+let isPointInBounds width height = function
     | (x, y) when x >= 0 &&
                   x < width &&
                   y >= 0 &&
                   y < height -> true
     | _                      -> false
 
+let isLineInBounds width height =
+    Seq.forall (isPointInBounds width height)
+
 let getLine coord length direction =
     let rec getLine' points currentPosition lengthRemaining =
         let newPoint = getCoordinateOfDirection currentPosition direction
         match lengthRemaining with
-        | 0 -> points
-        | x -> getLine' (newPoint::points) newPoint (x-1)
+        | 0                 -> points
+        | x when x = length -> getLine' (coord::points)    coord    (x-1)
+        | x                 -> getLine' (newPoint::points) newPoint (x-1)
     getLine' [] coord length
 
 let getLinesInAllDirectionsOfSize length coord =
     //let directions = FSharpType.GetUnionCases typeof<Direction>
     [UL;U;UR;L;R;DL;D;DR]
-    |> getLine coord length
-
-let getValidLines width height size =
-    Seq.map (getLinesInAllDirectionsOfSize size)
-    >> Seq.filter (Seq.forall (isInBounds width height))
+    |> Seq.map (getLine coord length)
 
 let getValueAtCoordinate grid coord =
     let x, y = coord
@@ -60,38 +60,46 @@ let largestProductInGrid grid size =
     let width = grid |> Seq.head |> Seq.length
     let height = grid |> Seq.length
 
-    getCoordinates width height
-    |> getValidLines width height size
-    |> Seq.map (getValuesFromGrid grid  >> Seq.reduce ( *))
-    |> Seq.max
+    1
+    //getCoordinates width height
+    //|> Seq.map (getLinesInAllDirectionsOfSize size)
+    //|> Seq.filter (isLineInBounds width height)
+    //|> Seq.map (getValuesFromGrid grid)
+    //|> Seq.map Seq.reduce ( * )
+    //|> Seq.max
 
-getCoordinates 2 2 |> Seq.toList |> Is [(0, 0);(0, 1);(1, 0);(1, 1)]
+getCoordinates 2 2 |> ContainsTheSameItemsAs [(0, 0);(0, 1);(1, 0);(1, 1)]
 
-getCoordinates 2 2 |> getLinesInAllDirectionsOfSize 2
-|> Seq.map Seq.toList |> Seq.toList
-|> Is [ [(0, 0);(0, 1)] ;
-        [(0, 0);(1, 0)] ;
-        [(0, 0);(1, 1)] ;
-        [(1, 0);(0, 1)] ]
+getLinesInAllDirectionsOfSize 2 (0,0)
+|> ContainsTheSameItemsAs [ [(-1, 1);(0, 0)]
+                            [( 0, 1);(0, 0)]
+                            [( 1, 1);(0, 0)]
+                            [(-1, 0);(0, 0)]
+                            [( 1, 0);(0, 0)]
+                            [(-1,-1);(0, 0)]
+                            [( 0,-1);(0, 0)]
+                            [( 1,-1);(0, 0)] ]
 
-getCoordinateOfDirection (0, 0) UL |> Is (-1 , 1 )
-getCoordinateOfDirection (0, 0) U  |> Is ( 0 , 1 )
-getCoordinateOfDirection (0, 0) UR |> Is ( 1 , 1 )
-getCoordinateOfDirection (0, 0) L  |> Is (-1 , 0 )
-getCoordinateOfDirection (0, 0) R  |> Is ( 1 , 0 )
-getCoordinateOfDirection (0, 0) DL |> Is (-1 ,-1 )
-getCoordinateOfDirection (0, 0) D  |> Is ( 0 ,-1 )
-getCoordinateOfDirection (0, 0) DR |> Is ( 1 ,-1 )
+getCoordinateOfDirection (0, 0) UL |> Is (-1, 1)
+getCoordinateOfDirection (0, 0) U  |> Is ( 0, 1)
+getCoordinateOfDirection (0, 0) UR |> Is ( 1, 1)
+getCoordinateOfDirection (0, 0) L  |> Is (-1, 0)
+getCoordinateOfDirection (0, 0) R  |> Is ( 1, 0)
+getCoordinateOfDirection (0, 0) DL |> Is (-1,-1)
+getCoordinateOfDirection (0, 0) D  |> Is ( 0,-1)
+getCoordinateOfDirection (0, 0) DR |> Is ( 1,-1)
 
-isInBounds 1 1 (0, 0) |> Is true
-isInBounds 2 2 (1, 1) |> Is true
-isInBounds 2 2 (-1, 1) |> Is false
-isInBounds 2 2 (1, 2) |> Is false
+isPointInBounds 1 1 (0, 0) |> Is true
+isPointInBounds 2 2 (1, 1) |> Is true
+isPointInBounds 2 2 (-1, 1) |> Is false
+isPointInBounds 2 2 (1, 2) |> Is false
 
-getLine (0, 0) 1 R |> Is [(0,0)]
-getLine (0, 0) 2 R |> Is [(0,0);(1,0)]
-getLine (1, 1) 3 DR |> Is [(1,1);(2,0);(3,-1)]
-getLine (4, 0) 4 U |> Is [(4,0);(4,1);(4,2);(4,3)]
+getLine (0, 0) 1 R |> ContainsTheSameItemsAs [(0,0)]
+getLine (0, 0) 2 R |> ContainsTheSameItemsAs [(0,0);(1,0)]
+getLine (1, 1) 3 DR |> ContainsTheSameItemsAs [(1,1);(2,0);(3,-1)]
+getLine (4, 0) 4 U |> ContainsTheSameItemsAs [(4,0);(4,1);(4,2);(4,3)]
+
+//getValuesFromGrid [[1;2];[3;4]] [(0,0);(1;1)] |> Seq.toList |> Is [1;4]
 
 largestProductInGrid [[1]] 1 |> Is 1
 //largestProductInGrid [[1;2];[3;4]] 1 |> Is 4
