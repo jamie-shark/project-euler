@@ -137,6 +137,4 @@ let testGrid =
       "01 70 54 71 83 51 54 69 16 92 33 48 61 43 52 01 89 19 67 48" ]
     |> Seq.map (fun x -> x.Split [|' '|] |> Seq.map int)
 
-//testGrid |> printfn "%A"
-//largestProductInGrid testGrid 4 |> Is 1000
-
+largestProductInGrid testGrid 4 |> Is 70600674
