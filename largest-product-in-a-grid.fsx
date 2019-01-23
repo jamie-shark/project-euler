@@ -65,15 +65,13 @@ let largestProductInGrid grid size =
         getLinesInAllDirectionsOfSize size
         >> Seq.filter (isLineInBounds width height)
         >> removeEmptyItems
-    let toGridValuesForLines = getValuesFromGrid grid
+    let toGridValuesForLines = Seq.map (getValuesFromGrid grid)
     let toProducts = Seq.map (Seq.reduce ( * ))
 
     getCoordinates width height
     |> Seq.map toLinesFromPoint
     |> removeEmptyItems
-    |> Seq.map (Seq.map toGridValuesForLines
-                >> toProducts
-                >> Seq.max)
+    |> Seq.map (toGridValuesForLines >> toProducts >> Seq.max)
     |> Seq.max
 
 getCoordinates 2 2 |> ContainsTheSameItemsAs [(0, 0);(0, 1);(1, 0);(1, 1)]
