@@ -3,18 +3,45 @@
 open Assertions
 open Lib
 
-let sumStringNumbers xs =
-    let rec helper total carryOver strings =
-        strings
-        |> Seq.filter ((=) "")
-    helper "" 0 (xs |> Seq.map reverseString)
-    |> reverseString
+let stringTake n =
+    Seq.take n
+    >> Seq.map string
+    >> String.concat ""
+
+let sumStringNumbers =
+    let rec helper total = function
+        | xs' when Seq.forall (Seq.isEmpty) xs' -> total
+        | xs' -> let remainingNumbers = xs'
+                                        |> List.filter (List.isEmpty >> not)
+                 let firstDigits = remainingNumbers
+                                   |> List.map List.head
+                 let remainingDigits = remainingNumbers
+                                       |> List.map (List.tail)
+                 let reversedFirstDigitsSum =
+                     firstDigits
+                     |> List.map (string >> int)
+                     |> List.reduce (+)
+                     |> string
+                     |> reverseString
+                     |> Seq.map char
+                     |> Seq.toList
+                 let (lastDigitOfSum::digitsToProcess) = reversedFirstDigitsSum
+                 helper (lastDigitOfSum::total) (digitsToProcess::remainingDigits)
+    List.map (reverseString >> Seq.map char >> Seq.toList)
+    >> helper []
+    >> Seq.map string
+    >> String.concat ""
 
 reverseString "abc" |> Is "cba"
+
+stringTake 3 "12345" |> Is "123"
 
 sumStringNumbers ["1";"1"] |> Is "2"
 sumStringNumbers ["11";"22";"33"] |> Is "66"
 sumStringNumbers ["99";"88";"77"] |> Is "264"
+sumStringNumbers ["999";"88";"77"] |> Is "1164"
+sumStringNumbers ["1000";"10"] |> Is "1010"
+sumStringNumbers ["123412341234";"987698769876";"1"] |> Is "1111111111111"
 
 let largeNumbers =
     [
@@ -119,3 +146,8 @@ let largeNumbers =
         "20849603980134001723930671666823555245252804609722"
         "53503534226472524250874054075591789781264330331690"
     ]
+
+largeNumbers
+|> sumStringNumbers
+|> stringTake 10
+|> Is "5537376230"
