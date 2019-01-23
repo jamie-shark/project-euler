@@ -19,6 +19,12 @@ let factorsOf n =
         | x                        -> helper  factors     (x+1)
     helper (n::[]) 1
 
+let firstTriangularNumberWithFactorCountAbove n =
+    triangularNumbers
+    |> Seq.find (factorsOf
+                 >> Seq.length
+                 >> ((<) n))
+
 triangularNumbers |> Seq.take 10 |> ContainsTheSameItemsAs [1;3;6;10;15;21;28;36;45;55]
 
 factorsOf 1  |> ContainsTheSameItemsAs [1]
@@ -28,3 +34,6 @@ factorsOf 10 |> ContainsTheSameItemsAs [1;2;5;10]
 factorsOf 15 |> ContainsTheSameItemsAs [1;3;5;15]
 factorsOf 21 |> ContainsTheSameItemsAs [1;3;7;21]
 factorsOf 28 |> ContainsTheSameItemsAs [1;2;4;7;14;28]
+
+firstTriangularNumberWithFactorCountAbove 5 |> Is 28
+firstTriangularNumberWithFactorCountAbove 500 |> Is 76576500
