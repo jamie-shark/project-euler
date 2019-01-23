@@ -53,20 +53,26 @@ let getValueAtCoordinate grid coord =
     |> Seq.skip y |> Seq.head
     |> Seq.skip x |> Seq.head
 
-let getValuesFromGrid grid =
-    Seq.map (getValueAtCoordinate grid)
+let getValuesFromGrid grid = Seq.map (getValueAtCoordinate grid)
 
 let largestProductInGrid grid size =
     let width = grid |> Seq.head |> Seq.length
     let height = grid |> Seq.length
 
-    1
-    //getCoordinates width height
-    //|> Seq.map (getLinesInAllDirectionsOfSize size)
-    //|> Seq.filter (isLineInBounds width height)
-    //|> Seq.map (getValuesFromGrid grid)
-    //|> Seq.map Seq.reduce ( * )
-    //|> Seq.max
+    let toLinesFromPoint =
+        getLinesInAllDirectionsOfSize size
+        >> Seq.filter (isLineInBounds width height)
+        >> Seq.filter (Seq.isEmpty >> not)
+    let toGridValuesForLines = getValuesFromGrid grid
+    let toProducts = Seq.map (Seq.reduce ( * ))
+
+    getCoordinates width height
+    |> Seq.map toLinesFromPoint
+    |> Seq.filter (Seq.isEmpty >> not)
+    |> Seq.map (Seq.map toGridValuesForLines
+                >> toProducts
+                >> Seq.max)
+    |> Seq.max
 
 getCoordinates 2 2 |> ContainsTheSameItemsAs [(0, 0);(0, 1);(1, 0);(1, 1)]
 
@@ -99,13 +105,14 @@ getLine (0, 0) 2 R |> ContainsTheSameItemsAs [(0,0);(1,0)]
 getLine (1, 1) 3 DR |> ContainsTheSameItemsAs [(1,1);(2,0);(3,-1)]
 getLine (4, 0) 4 U |> ContainsTheSameItemsAs [(4,0);(4,1);(4,2);(4,3)]
 
-//getValuesFromGrid [[1;2];[3;4]] [(0,0);(1;1)] |> Seq.toList |> Is [1;4]
+getValuesFromGrid [[1;2];[3;4]] [(0,0);(1,1)] |> ContainsTheSameItemsAs [1;4]
+getValuesFromGrid [[1;2];[3;4]] [(0,1);(0,1)] |> ContainsTheSameItemsAs [2;3]
 
 largestProductInGrid [[1]] 1 |> Is 1
-//largestProductInGrid [[1;2];[3;4]] 1 |> Is 4
-//largestProductInGrid [[1;2];[3;4]] 2 |> Is 12
-//largestProductInGrid [[1;2;3];[1;2;3];[1;2;3]] 2 |> Is 9
-//largestProductInGrid [[3;2;1];[1;3;2];[1;2;3]] 3 |> Is 27
+largestProductInGrid [[1;2];[3;4]] 1 |> Is 4
+largestProductInGrid [[1;2];[3;4]] 2 |> Is 12
+largestProductInGrid [[1;2;3];[1;2;3];[1;2;3]] 2 |> Is 9
+largestProductInGrid [[3;2;1];[1;3;2];[1;2;3]] 3 |> Is 27
 
 let testGrid =
     [ "08 02 22 97 38 15 00 40 00 75 04 05 07 78 52 12 50 77 91 08"
