@@ -23,15 +23,15 @@ let getCoordinateOfDirection coord direction =
     | (x, y), D  -> (x  , y-1)
     | (x, y), DR -> (x+1, y-1)
 
-let isPointInBounds width height = function
-    | (x, y) when x >= 0 &&
-                  x < width &&
-                  y >= 0 &&
-                  y < height -> true
-    | _                      -> false
+let getValueAtCoordinate grid coord =
+    let x, y = coord
+    grid
+    |> Seq.skip y |> Seq.head
+    |> Seq.skip x |> Seq.head
 
-let isLineInBounds width height =
-    Seq.forall (isPointInBounds width height)
+let getValuesFromGrid grid = Seq.map (getValueAtCoordinate grid)
+
+let inline removeEmptyItems listOfLists = Seq.filter (Seq.isEmpty >> not) listOfLists
 
 let getLine coord length direction =
     let rec getLine' points currentPosition lengthRemaining =
@@ -47,15 +47,15 @@ let getLinesInAllDirectionsOfSize length coord =
     [UL;U;UR;L;R;DL;D;DR]
     |> Seq.map (getLine coord length)
 
-let getValueAtCoordinate grid coord =
-    let x, y = coord
-    grid
-    |> Seq.skip y |> Seq.head
-    |> Seq.skip x |> Seq.head
+let isPointInBounds width height = function
+    | (x, y) when x >= 0 &&
+                  x < width &&
+                  y >= 0 &&
+                  y < height -> true
+    | _                      -> false
 
-let getValuesFromGrid grid = Seq.map (getValueAtCoordinate grid)
-
-let inline removeEmptyItems listOfLists = Seq.filter (Seq.isEmpty >> not) listOfLists
+let isLineInBounds width height =
+    Seq.forall (isPointInBounds width height)
 
 let largestProductInGrid grid size =
     let width = grid |> Seq.head |> Seq.length
