@@ -15,3 +15,10 @@ let ContainsTheSameItemsAs (expected:seq<'a>) (actual:seq<'a>) =
         then printf "."
         else printfn "F\nExpected %A but got %A" expected actual
 
+let inline time func =
+    (fun args -> let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+                 let result = func args
+                 stopWatch.Stop()
+                 printfn "got %A in %fms" result stopWatch.Elapsed.TotalMilliseconds
+                 result)
+

@@ -46,11 +46,11 @@ let inline isOneItem xs = Seq.length xs |> (=) 1
 let isPrime = primeFactors >> isOneItem
 let isIntPrime = intPrimeFactors >> isOneItem
 
-let reverseString (s:string) =
-    s.ToCharArray()
-    |> Array.rev
-    |> Array.map string
-    |> String.concat ""
+let toString (cs:seq<char>) = Seq.map string cs |> String.concat ""
+
+let toChars (s:string) = Seq.map char s
+
+let reverseString = toChars >> Seq.rev >> toString
 
 let isPalindrome number =
     let asString = string number

@@ -8,29 +8,29 @@ let stringTake n =
     >> Seq.map string
     >> String.concat ""
 
+let sumIntChars = Seq.map (string >> int) >> Seq.reduce (+)
+
 let sumStringNumbers =
-    let rec helper total = function
-        | xs' when Seq.forall (Seq.isEmpty) xs' -> total
-        | xs' -> let remainingNumbers = xs'
-                                        |> List.filter (List.isEmpty >> not)
-                 let firstDigits = remainingNumbers
-                                   |> List.map List.head
-                 let remainingDigits = remainingNumbers
-                                       |> List.map (List.tail)
-                 let reversedFirstDigitsSum =
-                     firstDigits
-                     |> List.map (string >> int)
-                     |> List.reduce (+)
-                     |> string
-                     |> reverseString
-                     |> Seq.map char
-                     |> Seq.toList
-                 let (lastDigitOfSum::digitsToProcess) = reversedFirstDigitsSum
-                 helper (lastDigitOfSum::total) (digitsToProcess::remainingDigits)
-    List.map (reverseString >> Seq.map char >> Seq.toList)
-    >> helper []
-    >> Seq.map string
-    >> String.concat ""
+    let rec sumByDigits total = function
+        | xs when Seq.forall (Seq.isEmpty) xs -> total
+        | xs -> let remainingNumbers = xs |> List.filter (Seq.isEmpty >> not)
+                let firstDigits = remainingNumbers |> List.map List.head
+                let remainingDigits = remainingNumbers |> List.map (List.tail)
+                let sumOfFirstDigitsReversed = firstDigits
+                                               |> sumIntChars
+                                               |> string
+                                               |> reverseString
+                let lastDigitOfSum = Seq.head sumOfFirstDigitsReversed
+                let carryOverDigits = sumOfFirstDigitsReversed
+                                      |> Seq.toList
+                                      |> List.tail
+                sumByDigits (lastDigitOfSum::total) (carryOverDigits::remainingDigits)
+    Seq.map (reverseString >> toChars >> Seq.toList)
+    >> Seq.toList
+    >> sumByDigits []
+    >> toString
+
+let sumStringNumbers2 = Seq.map System.Numerics.BigInteger.Parse >> Seq.sum
 
 reverseString "abc" |> Is "cba"
 
@@ -147,7 +147,10 @@ let largeNumbers =
         "53503534226472524250874054075591789781264330331690"
     ]
 
-largeNumbers
-|> sumStringNumbers
-|> stringTake 10
-|> Is "5537376230"
+time sumStringNumbers largeNumbers
+time sumStringNumbers2 largeNumbers
+
+//largeNumbers
+//|> sumStringNumbers
+//|> stringTake 10
+//|> Is "5537376230"
