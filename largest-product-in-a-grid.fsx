@@ -55,6 +55,8 @@ let getValueAtCoordinate grid coord =
 
 let getValuesFromGrid grid = Seq.map (getValueAtCoordinate grid)
 
+let inline removeEmptyItems listOfLists = Seq.filter (Seq.isEmpty >> not) listOfLists
+
 let largestProductInGrid grid size =
     let width = grid |> Seq.head |> Seq.length
     let height = grid |> Seq.length
@@ -62,13 +64,13 @@ let largestProductInGrid grid size =
     let toLinesFromPoint =
         getLinesInAllDirectionsOfSize size
         >> Seq.filter (isLineInBounds width height)
-        >> Seq.filter (Seq.isEmpty >> not)
+        >> removeEmptyItems
     let toGridValuesForLines = getValuesFromGrid grid
     let toProducts = Seq.map (Seq.reduce ( * ))
 
     getCoordinates width height
     |> Seq.map toLinesFromPoint
-    |> Seq.filter (Seq.isEmpty >> not)
+    |> removeEmptyItems
     |> Seq.map (Seq.map toGridValuesForLines
                 >> toProducts
                 >> Seq.max)
