@@ -3,20 +3,26 @@
 open Assertions
 open Lib
 
-let collatzSequence =
-    let nextCollatz = function
-        | Even n -> (n / 2) |> int
-        | Odd n  -> (3 * n) + 1
-    let rec sequence ns = function
-        | 1 -> (1::ns)
-        | n -> sequence (n::ns) (nextCollatz n)
-    sequence []
+let nextCollatz = function
+    | Even n -> (n / 2) |> int
+    | Odd n  -> (3 * n) + 1
 
-collatzSequence 13 |> Is [13;40;20;10;5;16;8;4;2;1]
+let rec collatzSequence n =
+    Seq.cache <| seq {
+        match n with
+        | 1 -> yield 1
+        | n -> yield n
+               yield! (collatzSequence (nextCollatz n))
+    }
 
-(*
-[1..1000000]
+let longestCollatzBelow n =
+    [1..n-1]
     |> Seq.map collatzSequence
-    |> Seq.
-    |> Is 1
-*)
+    |> Seq.maxBy Seq.length
+    |> Seq.head
+
+collatzSequence 13 |> Seq.toList |> Is [13;40;20;10;5;16;8;4;2;1]
+
+longestCollatzBelow 14 |> Is 9
+
+//longestCollatzBelow 1000000 |> Is 1
