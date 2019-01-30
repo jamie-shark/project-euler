@@ -8,15 +8,6 @@ let (><) = flip
 let (|Even|Odd|) x = if x % 2 = 0 then Even x else Odd x
 let (|EvenLong|OddLong|) x = if x % 2UL = 0UL then EvenLong x else OddLong x
 
-let newCache() = new System.Collections.Generic.Dictionary<_,_>()
-
-let memoise (cache:System.Collections.Generic.Dictionary<_,_>) func =
-    fun argument -> match cache.TryGetValue(argument) with
-                    | (true, result) -> result
-                    | _              -> let result = func(argument)
-                                        cache.Add(argument, result)
-                                        result
-
 let allNumbers =
     let rec next x =
         seq {
