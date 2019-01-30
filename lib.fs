@@ -5,6 +5,8 @@ open Microsoft.FSharp.Reflection
 let flip f a b = f b a
 let (><) = flip
 
+let (|Even|Odd|) x = if x % 2 = 0 then Even x else Odd x
+
 let allNumbers =
     let rec next x =
         seq {
