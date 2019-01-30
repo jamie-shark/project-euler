@@ -4,25 +4,28 @@ open Assertions
 open Lib
 
 let nextCollatz = function
-    | Even n -> (n / 2) |> int
-    | Odd n  -> (3 * n) + 1
+    | EvenLong n -> (n / 2UL) |> uint64
+    | OddLong n  -> (3UL * n) + 1UL
 
-let rec collatzSequence n =
-    Seq.cache <| seq {
-        match n with
-        | 1 -> yield 1
-        | n -> yield n
-               yield! (collatzSequence (nextCollatz n))
-    }
+let collatzSequence =
+    let cache = newCache()
+    let rec collatzSequence' = memoise cache (fun n ->
+        seq {
+            match n with
+            | 1UL -> yield 1UL
+            | n -> yield n
+                   yield! nextCollatz n |> collatzSequence'
+        })
+    collatzSequence'
 
 let longestCollatzBelow n =
-    [1..n-1]
-    |> Seq.map collatzSequence
-    |> Seq.maxBy Seq.length
-    |> Seq.head
+    [1UL..n-1UL]
+    |> Seq.map (fun n -> (n, collatzSequence n |> Seq.length))
+    |> Seq.maxBy snd
+    |> fst
 
-collatzSequence 13 |> Seq.toList |> Is [13;40;20;10;5;16;8;4;2;1]
+collatzSequence 13UL |> Seq.toList |> Is [13UL;40UL;20UL;10UL;5UL;16UL;8UL;4UL;2UL;1UL]
 
-longestCollatzBelow 14 |> Is 9
+longestCollatzBelow 14UL |> Is 9UL
 
-//longestCollatzBelow 1000000 |> Is 1
+//longestCollatzBelow 1000000UL |> Is 837799UL
