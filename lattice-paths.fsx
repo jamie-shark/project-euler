@@ -13,7 +13,6 @@ let flatten (tree:'a Tree) =
         | Branch(value, left, right) -> [left;right]
                                         |> List.collect (flattenBranches (value::branchSoFar))
     flattenBranches [] tree
-    |> List.distinct
 
 let getBranches coordinate branchLength =
     let rec branch coord = function
@@ -54,4 +53,5 @@ latticePaths 1 1 |> Seq.toList |> Is [[(0,0)]]
 latticePaths 2 2 |> Seq.toList |> Is [[(0,0);(1,0);(1,1)];
                                       [(0,0);(0,1);(1,1)]]
 
+[1..20] |> Seq.map (fun x -> latticePaths x x |> Seq.length) |> Seq.iter (printfn "%A")
 //latticePaths 20 20 |> Seq.length |> Is 20
