@@ -3,44 +3,44 @@
 open Assertions
 open Grid
 
-type 'a tree =
-    | EmptyTree
-    | TreeNode of 'a * 'a tree * 'a tree
+type 'a Tree =
+    | Leaf
+    | Branch of 'a * 'a Tree * 'a Tree
 
-let treePaths (t:'a tree) =
-    let rec subBranches branchSoFar = function
-        | TreeNode(value, leftBranch, rightBranch) ->
-            [leftBranch;rightBranch] |> List.collect (subBranches (value::branchSoFar))
-        | EmptyTree ->
-            [List.rev branchSoFar]
-    subBranches [] t |> List.distinct
+let flatten (tree:'a Tree) =
+    let rec flattenBranches branchSoFar = function
+        | Leaf                                   -> [List.rev branchSoFar]
+        | Branch(value, left, right) -> [left;right]
+                                                    |> List.collect (flattenBranches (value::branchSoFar))
+    flattenBranches [] tree
+    |> List.distinct
 
 let getBranches coordinate branchLength =
     let rec branch coord = function
-        | x when x = branchLength -> (coord, EmptyTree, EmptyTree)
+        | x when x = branchLength -> (coord, Leaf, Leaf)
         | x                       -> let right = getCoordinateOfDirection coord R
                                      let left = getCoordinateOfDirection coord D
-                                     (coord, TreeNode(branch right (x+1)), TreeNode(branch left (x+1)))
+                                     (coord, Branch(branch right (x+1)), Branch(branch left (x+1)))
     branch coordinate 0
 
-getBranches (0, 0) 0 |> Is <| ((0, 0), EmptyTree, EmptyTree)
+getBranches (0, 0) 0 |> Is <| ((0, 0), Leaf, Leaf)
 getBranches (0, 0) 1 |> Is <| ((0, 0),
-                                TreeNode((1,  0), EmptyTree, EmptyTree),
-                                TreeNode((0, -1), EmptyTree, EmptyTree))
+                                Branch((1,  0), Leaf, Leaf),
+                                Branch((0, -1), Leaf, Leaf))
 getBranches (0, 0) 2 |> Is <| ((0, 0),
-                                TreeNode((1,  0),
-                                    TreeNode((2,  0), EmptyTree, EmptyTree),
-                                    TreeNode((1, -1), EmptyTree, EmptyTree)),
-                                TreeNode((0, -1),
-                                    TreeNode((1, -1), EmptyTree, EmptyTree),
-                                    TreeNode((0, -2), EmptyTree, EmptyTree)))
+                                Branch((1,  0),
+                                    Branch((2,  0), Leaf, Leaf),
+                                    Branch((1, -1), Leaf, Leaf)),
+                                Branch((0, -1),
+                                    Branch((1, -1), Leaf, Leaf),
+                                    Branch((0, -2), Leaf, Leaf)))
 
-TreeNode(1, EmptyTree, EmptyTree) |> treePaths |> Is [[1]]
-TreeNode("a",
-    TreeNode("b",
-        EmptyTree,
-        TreeNode("c", EmptyTree, EmptyTree)),
-    TreeNode("d", EmptyTree, EmptyTree))
-|> treePaths |> Is [["a";"b"];["a";"b";"c"];["a";"d"]]
+Branch(1, Leaf, Leaf) |> flatten |> Is [[1]]
+Branch("a",
+    Branch("b",
+        Leaf,
+        Branch("c", Leaf, Leaf)),
+    Branch("d", Leaf, Leaf))
+|> flatten |> Is [["a";"b"];["a";"b";"c"];["a";"d"]]
 
 //latticePaths 1 1 |> Is [[R;D];[D;R]]
